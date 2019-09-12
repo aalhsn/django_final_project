@@ -1,1 +1,2 @@
-# event_planner_Follower
+# event_planner_Follower(FINAL VERSION)
+added organizers list, and organizer's events button in their profile, and fixed the following issues, we need to fix the displaying issues and choose good profile and event photos, work on testing everything

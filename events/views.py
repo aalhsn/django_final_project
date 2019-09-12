@@ -15,46 +15,85 @@ def profile(request, user_id):
 	profile= Profile.objects.get(user_id=user_id)
 	user= User.objects.get(id=user_id)
 	events= Event.objects.filter(organizer=user)
+	check=None
 
-	def check_follow():
+	try:
+		obj = Contact.objects.get(following=user, follower=request.user)
 
-		
+	except Contact.DoesNotExist:
+		if request.POST.get('follow'):
+			try:
+				obj = Contact.objects.get(following=user, follower=request.user)
+				check = True
+			except Contact.DoesNotExist:
+				Contact.objects.create(following=user,follower=request.user)
+				check = True
+		elif request.POST.get('unfollow'):
+			try:
+				obj = Contact.objects.get(following=user, follower=request.user)
+				check=False
+			except Contact.DoesNotExist:
+				Contact.objects.get(following=user,follower=request.user).delete()
+				check=False
+	else:
 
-		if request.user in Contact.objects.filter(following=user):
-			return True
-		else: False
+		if request.user == obj.follower:
+			check= True
+		else: 
+			check= False
 
-	if request.POST.get('follow'):
-		try:
-			obj = Contact.objects.get(following=user, follower=request.user)
-		except Contact.DoesNotExist:
-			Contact.objects.create(following=user,follower=request.user)
-	elif request.POST.get('unfollow'):
-		try:
-			obj = Contact.objects.get(following=user, follower=request.user)
-		except Contact.DoesNotExist:
-			Contact.objects.get(following=user,follower=request.user).delete()
-
+		if request.POST.get('follow'):
+			try:
+				obj = Contact.objects.get(following=user, follower=request.user)
+				check = True
+			except Contact.DoesNotExist:
+				Contact.objects.create(following=user,follower=request.user)
+				check = True
+		elif request.POST.get('unfollow'):
+			try:
+				obj = Contact.objects.get(following=user, follower=request.user)
+				check=False
+			except Contact.DoesNotExist:
+				Contact.objects.get(following=user,follower=request.user).delete()
+				check=False
+				
 	context = {
-
 		'profile':profile,
 		'events':events,
-		'followers_of_user':check_follow(),
+		'followers_of_user':check,
 	}
 	return render(request, 'profile.html', context)
 
+def organizers_list(request):
+	if request.user.is_anonymous :
+		messages.warning(request, "You need to sign in first")
+		return redirect('events:signin')
+	profiles = Profile.objects.all()
+	orglist=[]
+	for p in profiles:
+		try:
+			Event.objects.get(organizer=p.user)
+			orglist.append(p)
+		except Event.DoesNotExist:
+			pass
+
+	context={
+
+		'organizers':orglist,
+
+	}
+	return render(request, 'organizers_list.html', context)
 
 def home(request):
 	return render(request, 'home.html')
 
-def UpdateProfile(request):		# update_profile, ~profile_id~
+def UpdateProfile(request, user_id):		# update_profile, ~profile_id~
 	# redundant
 	
 	if request.user.is_anonymous :
 		messages.warning(request, "You need to sign in first")
 		return redirect('events:signin')
-
-	profile=Profile.objects.get(user=request.user)
+	profile=Profile.objects.get(user_id=user_id)
 	form= ProfileUpdate(instance=profile)
 	form2= ProfileUser(instance=request.user)
 	if request.method == "POST":
@@ -64,7 +103,7 @@ def UpdateProfile(request):		# update_profile, ~profile_id~
 			form.save()
 			form2.save()
 			messages.success(request, "Successfully Edited!")
-			return redirect('events:profile')
+			return redirect('events:profile', user_id)
 	context = {
 	"form": form,
 	"profile": profile,

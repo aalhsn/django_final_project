@@ -114,3 +114,18 @@ header.masthead .masthead-content .masthead-subheading{font-size:4rem}}
 	margin-top:-20%;
 
 }
+
+.profile_img {
+
+	border-radius: 50% !important;
+}
+
+.d-flex {
+  display: -webkit-box !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+}
+
+.pro  {
+	margin-top: -2% !important;
+}

@@ -16,7 +16,13 @@
        </form>
   </div>
 </div>
+    {% if request.user.is_anonymous %}
         <a href="{% url 'events:event-list' %}" class="btn btn-primary btn-xl rounded-pill mt-5">Explore All Events</a>
+        {% else %}
+        <a href="{% url 'events:event-list' %}" class="btn btn-primary btn-xl rounded-pill mt-5">Explore All Events</a>
+        <br>
+        <a href="{% url 'events:organizers-list' %}" class="btn btn-secondary btn-xl rounded-pill mt-3">Event Organizers!</a>
+        {% endif %}
     </div>
   </div>
   <div class="bg-circle-1 bg-circle"></div>
